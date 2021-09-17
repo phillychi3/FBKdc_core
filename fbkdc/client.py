@@ -3,7 +3,7 @@
 """
 import logging 
 import asyncio
-from .route import route
+from .route import *
 
 log = logging.getLogger(__name__)
 
@@ -15,9 +15,13 @@ class Clent():
     def __init__(self):
         self.loop = asyncio.get_event_loop() 
 
+
+
+
     async def login(self,token):
         log.info("login with token")
-        await route.login(token)
+        print(token)
+        await Route().httplogin(token)
 
     async def connect(self):
         log.info("connect")
