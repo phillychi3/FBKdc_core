@@ -1,7 +1,7 @@
 
 import requests
 import logging
-
+import json
 
 apiurl="https://discord.com/api/v9"
 log = logging.getLogger(__name__)
@@ -26,5 +26,14 @@ class Route():
 
 
     async def httplogin(self,token):
-        print(token)
+        logging.debug(token)
         await self.http("GET",apiurl+"/users/@me",TOKEN=token)
+
+
+    async def getgateway(self,encoded="json",v=9):
+        get = await self.http("GET",apiurl+"/gateway")
+        get = get.json()
+        print(get)
+        data = f"{get['url']}?encoding={encoded}&v={v}"
+        return data
+        
