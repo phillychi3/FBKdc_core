@@ -29,7 +29,7 @@ class Clent():
         log.info("connect")
         gatewayurl = await Route().getgateway()
         logging.debug(gatewayurl)
-        await Clientgateway(self.token,gatewayurl).clientgate()
+        await Clientgateway(self.token,gatewayurl).startlink()
 
 
 

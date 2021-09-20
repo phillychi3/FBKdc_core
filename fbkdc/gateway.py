@@ -3,9 +3,14 @@ import json
 import asyncio
 import logging
 import sys
-
+import threading
+import time
 logger = logging.getLogger(__name__)
 webs = websockets
+
+
+
+
 
 class Clientgateway():
 
@@ -30,49 +35,62 @@ class Clientgateway():
         self.token = token
         self.url = url
 
-    async def receive(self,response):
-        logger.debug(response)
 
 
 
 
-    async def send(self,url,payload):
-        print(url)
-        print(payload)
-        async with websockets.connect(url) as websocket:
-            await websocket.send(json.dumps(payload))
-
-            response = await websocket.recv()
-            logger.debug(response)
+    async def startlink(self):
+        while True:
+            async with websockets.connect(self.url) as websocket:
 
 
+                while True:
+                    response = await websocket.recv()
+
+                    response = json.loads(response)
+                    print("------------------------------------------------------")
+                    print(response)
+                    op = response["op"]
+                    #data = response.get('d')
+                    #seq = response.get('s')
+
+                    if op != self.DISPATCH:
 
 
+                        if op == self.HEARTBEAT_ACK:
+                            print("IS HEARTBEAT_ACK")
+                            continue
 
-    async def clientgate(self):
+                        if op == self.HEARTBEAT:
+                            print("IS HEARTBEAT")
 
+                            beat =  {
+                            'op':self.HEARTBEAT,
+                            'd': time.time()
+                            }
+                            
+                            await websocket.send(json.dumps(beat))
+                            
+                        if op == self.HELLO:
+                            print("IS HELLO")
+                            beat =  {
+                            'op': self.HEARTBEAT,
+                            'd': time.time()
+                            }
+                            await websocket.send(json.dumps(beat))
+                            payload = {
+                                'op': self.IDENTIFY,
+                                'd': {
+                                    'token': self.token,
+                                    "intents": 513,
+                                    'properties': {
+                                        '$os': sys.platform,
+                                        '$browser': 'FBKdc',
+                                        '$device': 'FBKdc',
+                                        '$referrer': '',
+                                        '$referring_domain': ''
+                                    }
+                                }
+                            }
+                            await websocket.send(json.dumps(payload))
 
-        logger.info("Connecting to gateway")
-
-        await self.identity()
-
-
-
-    async def identity(self):
-        payload = {
-            'op': self.IDENTIFY,
-            'd': {
-                'token': self.token,
-                'properties': {
-                    '$os': sys.platform,
-                    '$browser': 'FBKdc',
-                    '$device': 'FBKdc',
-                    '$referrer': '',
-                    '$referring_domain': ''
-                },
-                'compress': True,
-                'large_threshold': 250,
-                'v': 3
-            }
-        }
-        await self.send(self.url,payload)
