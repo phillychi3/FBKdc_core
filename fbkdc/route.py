@@ -21,7 +21,7 @@ class Route():
             re = requests.post(url)
             return re
         else:
-            log.warning("你麼到這的")
+            log.warning("how can u get in")
             raise Exception("不支援的method")
 
 

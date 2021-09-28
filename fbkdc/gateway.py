@@ -34,13 +34,14 @@ class Clientgateway():
     def __init__(self, token,url):
         self.token = token
         self.url = url
+        self.allive = True
 
 
 
 
 
     async def startlink(self):
-        while True:
+        while self.allive:
             async with websockets.connect(self.url) as websocket:
 
 
@@ -93,4 +94,16 @@ class Clientgateway():
                                 }
                             }
                             await websocket.send(json.dumps(payload))
+
+                        if op == self.INVALIDATE_SESSION:
+                            print("is INVALIDATE_SESSION")
+                            self.allive = False
+                            await websocket.close()
+                            await self.RECONNECT()
+
+
+    async def RECONNECT(self):
+        print("i am here")
+        self.allive = True
+        await self.startlink()
 
